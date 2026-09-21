@@ -15,6 +15,185 @@ const state = {
 };
 
 // =============================================================================
+// DEMO DATASET (8 INDUSTRIAL MACHINES & 13 WORK ORDERS ALL CATEGORIES)
+// =============================================================================
+const DEFAULT_DEMO_EQUIPMENTS = [
+  { code: 'CMP-001', name: 'Compresor Tornillo Rotativo GA-75', type: 'Neumático / Aire', location: 'Sala de Compresores - Nave A', status: 'MAINTENANCE', operating_hours: 1850.5, created_at: '2026-09-14 08:00:00' },
+  { code: 'BMB-102', name: 'Bomba Centrífuga Multietapa KSB-80', type: 'Hidráulico / Bombeo', location: 'Línea de Enfriamiento Principal', status: 'MAINTENANCE', operating_hours: 3420.0, created_at: '2026-09-14 08:00:00' },
+  { code: 'MTR-305', name: 'Motor Eléctrico Trifásico Siemens 75HP', type: 'Eléctrico / Potencia', location: 'Molino Principal #1', status: 'MAINTENANCE', operating_hours: 5210.0, created_at: '2026-09-14 08:00:00' },
+  { code: 'CNV-040', name: 'Banda Transportadora Modular Mod-B', type: 'Mecánico / Transporte', location: 'Área de Empaque y Paletizado', status: 'OPERATIONAL', operating_hours: 980.5, created_at: '2026-09-14 08:00:00' },
+  { code: 'CAL-201', name: 'Caldera Pirotubular de Vapor 500BHP', type: 'Térmico / Vapor', location: 'Planta de Servicios Térmicos', status: 'WARNING', operating_hours: 4120.0, created_at: '2026-09-14 08:00:00' },
+  { code: 'EXT-501', name: 'Extrusora Industrial Doble Husillo 120mm', type: 'Mecánico / Plásticos', location: 'Nave de Extrusión #3', status: 'OPERATIONAL', operating_hours: 2145.0, created_at: '2026-09-14 08:00:00' },
+  { code: 'TOR-108', name: 'Torre de Enfriamiento Tiro Inducido 350TR', type: 'Refrigeración / Térmico', location: 'Patio de Servicios Exteriores', status: 'OPERATIONAL', operating_hours: 3890.0, created_at: '2026-09-14 08:00:00' },
+  { code: 'GEN-602', name: 'Generador Diésel Cummins 450kVA', type: 'Generación Eléctrica', location: 'Subestación Eléctrica #2', status: 'OPERATIONAL', operating_hours: 620.0, created_at: '2026-09-14 08:00:00' },
+];
+
+const DEFAULT_DEMO_WORK_ORDERS = [
+  // Carlos Mendoza (Mecánico)
+  {
+    id: 1, equipment_code: 'CMP-001',
+    title: 'Mantenimiento Preventivo 2000h: Filtros y Aceite Sintético',
+    description: 'Cambio de cartucho separador de aceite, filtro de aire y sustitución de 20L de lubricante sintético ISO VG 46.',
+    type: 'PREVENTIVE', priority: 'HIGH', status: 'IN_PROGRESS',
+    assigned_technician: 'Ing. Carlos Mendoza', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-18 09:00:00', closed_at: null
+  },
+  {
+    id: 2, equipment_code: 'CNV-040',
+    title: 'Ajuste de tensión y alineación de banda transportadora',
+    description: 'Se detecta leve desalineación lateral en el rodillo tensor de cola provocando fricción en el chasis.',
+    type: 'CORRECTIVE', priority: 'MEDIUM', status: 'PENDING',
+    assigned_technician: 'Ing. Carlos Mendoza', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-19 11:30:00', closed_at: null
+  },
+  {
+    id: 3, equipment_code: 'EXT-501',
+    title: 'Inspección Termográfica en Resistencias y Reductor',
+    description: 'Termografía infrarroja de zonas 1 a 6 y medición de temperatura en cojinetes de empuje.\n\n--- INFORME DE CIERRE TÉCNICO ---\n• Trabajo Realizado: Termografía completada. Zona 3 presentaba conexión floja en bornera; se retorqueó a 4.5 Nm. Temperaturas normalizadas en 62°C.\n• Materiales/Repuestos Usados: Grasa para alta temperatura Polyrex EM, terminales de compresión de cobre calibre 8 AWG.',
+    type: 'PREDICTIVE', priority: 'MEDIUM', status: 'COMPLETED',
+    assigned_technician: 'Ing. Carlos Mendoza', downtime_hours: 1.5, cost: 280.0,
+    created_at: '2026-09-17 08:00:00', closed_at: '2026-09-17 12:30:00'
+  },
+
+  // Laura Ramos (Eléctrico)
+  {
+    id: 4, equipment_code: 'GEN-602',
+    title: 'Prueba en Vacío y Verificación de Baterías de Arranque',
+    description: 'Comprobación de electrolito, tensión en flotación (27.4V DC), limpieza de bornes y arranque de prueba 15 min.',
+    type: 'PREVENTIVE', priority: 'LOW', status: 'PENDING',
+    assigned_technician: 'Tec. Laura Ramos', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-19 14:00:00', closed_at: null
+  },
+  {
+    id: 5, equipment_code: 'MTR-305',
+    title: 'Corrección de Sobrecorriente y Reemplazo de Contactor',
+    description: 'El contactor de línea principal presenta arqueo en polos 1 y 3 provocando disparo térmico intermitente.',
+    type: 'CORRECTIVE', priority: 'HIGH', status: 'IN_PROGRESS',
+    assigned_technician: 'Tec. Laura Ramos', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-18 10:15:00', closed_at: null
+  },
+  {
+    id: 6, equipment_code: 'MTR-305',
+    title: 'Medición de Resistencia de Aislamiento (Megóhmetro)',
+    description: 'Ensayo dieléctrico a 1000V DC entre fases y masa para certificar estado de bobinado.\n\n--- INFORME DE CIERRE TÉCNICO ---\n• Trabajo Realizado: Lectura de aislamiento > 850 Megaohms, índice de polarización 2.8 (óptimo). Se cambiaron empaques de la caja de conexiones.\n• Materiales/Repuestos Usados: Empaque de neopreno para caja de borneras, spray limpiador dieléctrico CRC.',
+    type: 'PREDICTIVE', priority: 'MEDIUM', status: 'COMPLETED',
+    assigned_technician: 'Tec. Laura Ramos', downtime_hours: 2.0, cost: 420.0,
+    created_at: '2026-09-16 13:00:00', closed_at: '2026-09-16 16:30:00'
+  },
+
+  // Andrés Silva (Predictivo / Instrumentación)
+  {
+    id: 7, equipment_code: 'CAL-201',
+    title: 'Purga de Fondo y Calibración de Presostatos',
+    description: 'Maniobra de purga de lodos en caldera, control de nivel McDonnell Miller y test de disparo por sobrepresión.',
+    type: 'PREVENTIVE', priority: 'HIGH', status: 'PENDING',
+    assigned_technician: 'Tec. Andrés Silva', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-19 07:30:00', closed_at: null
+  },
+  {
+    id: 8, equipment_code: 'BMB-102',
+    title: 'Reemplazo de Sello Mecánico de Cartucho por Goteo',
+    description: 'Goteo continuo de 15 gotas/min en prensaestopas lado bomba; desmontaje y montaje de nuevo sello de carburo de silicio.',
+    type: 'CORRECTIVE', priority: 'CRITICAL', status: 'IN_PROGRESS',
+    assigned_technician: 'Tec. Andrés Silva', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-18 15:45:00', closed_at: null
+  },
+  {
+    id: 9, equipment_code: 'TOR-108',
+    title: 'Análisis de Vibraciones FFT en Ventilador de Tiro',
+    description: 'Registro espectral en 1X y 2X RPM para diagnosticar posible desbalance o soltura mecánica en aspas.\n\n--- INFORME DE CIERRE TÉCNICO ---\n• Trabajo Realizado: Se detectó incrustación de sarro en 2 aspas que causaba desbalance. Se limpiaron aspas con hidrolavadora y vibración bajó de 4.8 mm/s a 1.2 mm/s RMS (Zona A ISO 10816).\n• Materiales/Repuestos Usados: Desincrustante biodegradable industrial, arandelas de presión de acero inoxidable 316.',
+    type: 'PREDICTIVE', priority: 'MEDIUM', status: 'COMPLETED',
+    assigned_technician: 'Tec. Andrés Silva', downtime_hours: 1.0, cost: 180.0,
+    created_at: '2026-09-15 10:00:00', closed_at: '2026-09-15 13:00:00'
+  },
+
+  // Órdenes SIN ASIGNAR (Disponibles para cualquier técnico)
+  {
+    id: 10, equipment_code: 'EXT-501',
+    title: 'Lubricación de Crapodina y Engranajes Planetarios',
+    description: 'Engrase general con bomba neumática en los puntos de engrase centralizados del cabezal extrusor.',
+    type: 'PREVENTIVE', priority: 'MEDIUM', status: 'PENDING',
+    assigned_technician: 'Sin Asignar', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-20 08:30:00', closed_at: null
+  },
+  {
+    id: 11, equipment_code: 'CAL-201',
+    title: 'Fuga de Vapor en Brida de Válvula de Seguridad #2',
+    description: 'Vapor visible en junta espirometálica. Requiere despresurizar línea secundaria y cambio de empaque.',
+    type: 'CORRECTIVE', priority: 'CRITICAL', status: 'PENDING',
+    assigned_technician: 'Sin Asignar', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-20 10:15:00', closed_at: null
+  },
+  {
+    id: 12, equipment_code: 'CMP-001',
+    title: 'Monitoreo Acústico de Ultrasonido en Red de Aire',
+    description: 'Rastreo con detector de ultrasonido digital en colectores de 4 pulgadas y derivaciones a naves B y C.',
+    type: 'PREDICTIVE', priority: 'LOW', status: 'PENDING',
+    assigned_technician: 'Sin Asignar', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-20 13:45:00', closed_at: null
+  },
+  {
+    id: 13, equipment_code: 'TOR-108',
+    title: 'Sustitución de Sensor de Flujo y Válvula Solenoide',
+    description: 'La válvula solenoide de reposición de agua tratada no cierra herméticamente provocando desborde leve en balsa.',
+    type: 'CORRECTIVE', priority: 'HIGH', status: 'PENDING',
+    assigned_technician: 'Sin Asignar', downtime_hours: 0.0, cost: 0.0,
+    created_at: '2026-09-21 09:00:00', closed_at: null
+  },
+];
+
+function getLocalOrDemoEquipments() {
+  try {
+    const raw = localStorage.getItem('cmms_demo_equipments');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  localStorage.setItem('cmms_demo_equipments', JSON.stringify(DEFAULT_DEMO_EQUIPMENTS));
+  return DEFAULT_DEMO_EQUIPMENTS;
+}
+
+function getLocalOrDemoWorkOrders() {
+  try {
+    const raw = localStorage.getItem('cmms_demo_work_orders');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  localStorage.setItem('cmms_demo_work_orders', JSON.stringify(DEFAULT_DEMO_WORK_ORDERS));
+  return DEFAULT_DEMO_WORK_ORDERS;
+}
+
+function calculateLocalKPIs() {
+  const eqs = state.equipments.length > 0 ? state.equipments : DEFAULT_DEMO_EQUIPMENTS;
+  const wos = state.workOrders.length > 0 ? state.workOrders : DEFAULT_DEMO_WORK_ORDERS;
+
+  const totalHours = eqs.reduce((acc, e) => acc + (parseFloat(e.operating_hours) || 0), 0);
+  const activeWos = wos.filter(w => w.status === 'PENDING' || w.status === 'IN_PROGRESS').length;
+  const correctiveFailures = wos.filter(w => w.type === 'CORRECTIVE').length;
+  const downtime = wos.reduce((acc, w) => acc + (parseFloat(w.downtime_hours) || 0), 0);
+  const totalCost = wos.reduce((acc, w) => acc + (parseFloat(w.cost) || 0), 0);
+
+  const availability = totalHours > 0 ? Math.max(0, Math.min(100, ((totalHours - downtime) / totalHours) * 100)) : 94.8;
+  const mtbf = correctiveFailures > 0 ? (totalHours / correctiveFailures) : totalHours;
+  const mttr = correctiveFailures > 0 ? (downtime / correctiveFailures) : 0;
+
+  return {
+    total_equipments: eqs.length,
+    total_operating_hours: totalHours,
+    active_work_orders: activeWos,
+    corrective_failures: correctiveFailures,
+    corrective_downtime_hours: downtime,
+    total_cost: totalCost,
+    availability_pct: availability,
+    mtbf_hours: mtbf,
+    mttr_hours: mttr,
+  };
+}
+
+// =============================================================================
 // INITIALIZATION & TAB NAVIGATION
 // =============================================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,32 +293,48 @@ async function loadAllData() {
 async function fetchEquipments() {
   try {
     const res = await apiRequest('/api/equipments');
-    state.equipments = res.equipments || [];
-    renderEquipmentsTable();
-    populateEquipmentSelects();
+    if (res && res.equipments && res.equipments.length > 0) {
+      state.equipments = res.equipments;
+      localStorage.setItem('cmms_demo_equipments', JSON.stringify(res.equipments));
+    } else {
+      state.equipments = getLocalOrDemoEquipments();
+    }
   } catch (e) {
-    console.error('Error fetching equipments:', e);
+    console.warn('API error, using demo equipments:', e);
+    state.equipments = getLocalOrDemoEquipments();
   }
+  renderEquipmentsTable();
+  populateEquipmentSelects();
 }
 
 async function fetchWorkOrders() {
   try {
     const res = await apiRequest('/api/work-orders');
-    state.workOrders = res.work_orders || [];
-    renderWorkOrdersTable();
+    if (res && res.work_orders && res.work_orders.length > 0) {
+      state.workOrders = res.work_orders;
+      localStorage.setItem('cmms_demo_work_orders', JSON.stringify(res.work_orders));
+    } else {
+      state.workOrders = getLocalOrDemoWorkOrders();
+    }
   } catch (e) {
-    console.error('Error fetching work orders:', e);
+    console.warn('API error, using demo work orders:', e);
+    state.workOrders = getLocalOrDemoWorkOrders();
   }
+  renderWorkOrdersTable();
 }
 
 async function fetchKPIs() {
   try {
     const res = await apiRequest('/api/kpis');
-    state.kpis = res.kpis || {};
-    renderKPIs();
+    if (res && res.kpis && res.kpis.total_equipments > 0) {
+      state.kpis = res.kpis;
+    } else {
+      state.kpis = calculateLocalKPIs();
+    }
   } catch (e) {
-    console.error('Error fetching KPIs:', e);
+    state.kpis = calculateLocalKPIs();
   }
+  renderKPIs();
 }
 
 // =============================================================================

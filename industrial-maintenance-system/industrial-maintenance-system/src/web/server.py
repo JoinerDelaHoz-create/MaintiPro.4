@@ -106,6 +106,27 @@ class CMMSRequestHandler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             return {}
 
+    def _get_request_path_and_query(self):
+        """Resolves request path and query parameters supporting both local and Vercel serverless rewrites."""
+        raw_path = (
+            self.headers.get("x-matched-path")
+            or self.headers.get("x-forwarded-uri")
+            or self.headers.get("x-invoke-path")
+            or self.path
+        )
+        parsed = urllib.parse.urlparse(raw_path)
+        path = parsed.path.rstrip("/")
+        query = urllib.parse.parse_qs(parsed.query)
+
+        # If rewritten to /api/index or /api/index.py, inspect query params (e.g., match or path parameter)
+        if path in ("/api/index.py", "/api/index", "/api"):
+            candidates = query.get("match", []) or query.get("path", [])
+            if candidates:
+                sub = candidates[0].lstrip("/")
+                path = f"/api/{sub}"
+
+        return path, query
+
     def do_OPTIONS(self) -> None:
         """Handles preflight requests."""
         self.send_response(204)
@@ -167,9 +188,7 @@ class CMMSRequestHandler(BaseHTTPRequestHandler):
     # GET DISPATCHER
     # =========================================================================
     def do_GET(self) -> None:
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path.rstrip("/")
-        query = urllib.parse.parse_qs(parsed.query)
+        path, query = self._get_request_path_and_query()
 
         # 0. API Auth Me
         if path == "/api/auth/me":
@@ -303,15 +322,14 @@ class CMMSRequestHandler(BaseHTTPRequestHandler):
             return
 
         # Static fallback
-        if not self._serve_static_file(parsed.path):
+        if not self._serve_static_file(path):
             self._send_error("Recurso no encontrado", 404)
 
     # =========================================================================
     # POST DISPATCHER
     # =========================================================================
     def do_POST(self) -> None:
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path.rstrip("/")
+        path, query = self._get_request_path_and_query()
         body = self._read_body_json()
 
         # 0. Auth - Login
