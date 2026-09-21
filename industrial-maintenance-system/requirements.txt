@@ -1,0 +1,6 @@
+# Industrial Maintenance Management System (CMMS)
+# El sistema base funciona al 100% utilizando únicamente la biblioteca estándar de Python (sqlite3, dataclasses, csv).
+#
+# Dependencias opcionales:
+# Para conectar con hardware físico Arduino mediante puerto Serial (COM):
+pyserial>=3.5
