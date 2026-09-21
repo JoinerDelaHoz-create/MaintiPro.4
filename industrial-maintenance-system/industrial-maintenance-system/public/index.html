@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMMS Industrial - Sistema de Gestión de Mantenimiento & Telemetría IoT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Top Application Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">CMMS INDUSTRIAL</div>
+        <div class="brand-sub">Asset Maintenance & Condition Monitoring</div>
+      </div>
+    </div>
+
+    <!-- Quick Status & Global Actions -->
+    <div class="topbar-actions">
+      <div class="live-pill" id="system-status-indicator">
+        <span class="pulse-dot"></span>
+        <span id="system-status-text">Base de Datos: SQLite En Línea</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btn-open-mobile-access" title="Ver enlace Wi-Fi para celulares y tablets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        Móvil / Wi-Fi
+      </button>
+      <button class="btn btn-secondary btn-sm" id="btn-load-demo" title="Cargar Activos y Órdenes de prueba si está vacío">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Cargar Demo
+      </button>
+      <button class="btn btn-primary btn-sm" id="btn-quick-new-equipment">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Nuevo Activo
+      </button>
+      <button class="btn btn-accent btn-sm" id="btn-quick-new-wo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Nueva OT
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body Layout -->
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="tab-dashboard" id="nav-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          <span>Tablero & KPIs</span>
+        </button>
+        <button class="nav-item" data-tab="tab-equipments" id="nav-equipments">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          <span>Inventario de Activos</span>
+        </button>
+        <button class="nav-item" data-tab="tab-work-orders" id="nav-work-orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
+          <span>Órdenes de Trabajo</span>
+        </button>
+        <button class="nav-item" data-tab="tab-iot" id="nav-iot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+          <span>Telemetría IoT & Arduino</span>
+        </button>
+        <button class="nav-item" data-tab="tab-reports" id="nav-reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Reportes & CSV</span>
+        </button>
+        <a href="/tecnico" target="_blank" class="nav-item" style="color: #38bdf8; text-decoration: none; margin-top: 8px; border-top: 1px dashed var(--border-subtle); padding-top: 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          <span>Portal Técnicos 📱</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge" style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+              <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 13px;">👑</div>
+              <div style="display: flex; flex-direction: column; overflow: hidden;">
+                <span id="admin-user-name" style="font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Administrador</span>
+                <span style="font-size: 10px; color: #38bdf8; font-family: var(--font-mono);">Panel Total (Admin)</span>
+              </div>
+            </div>
+            <button type="button" id="btn-admin-logout" title="Cerrar Sesión" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; display: flex; align-items: center;">
+              Salir
+            </button>
+          </div>
+          <button type="button" class="btn-open-change-password" id="btn-open-change-password" style="width: 100%; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25); color: #38bdf8; border-radius: 6px; padding: 6px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            <span>🔒 Cambiar Contraseña</span>
+          </button>
+        </div>
+        <div class="version-tag">CMMS Industrial v2.0</div>
+        <div class="tech-badge">Python + SQLite + IoT</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- =================================================================== -->
+      <!-- TAB 1: TABLERO & KPIS INDUSTRIALES -->
+      <!-- =================================================================== -->
+      <section class="tab-pane active" id="tab-dashboard">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Tablero Operacional de Planta</h1>
+            <p class="view-subtitle">Monitoreo global de confiabilidad, disponibilidad de equipos y costos de mantenimiento.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-refresh-kpis">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Actualizar Métricas
+          </button>
+        </div>
+
+        <!-- Global Summary Metric Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon icon-cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-total-equipments">-</div>
+              <div class="stat-label">Activos Registrados</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-emerald">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-total-hours">- h</div>
+              <div class="stat-label">Horas Operativas Totales</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-active-wos">-</div>
+              <div class="stat-label">OTs Activas (Pend./Proc.)</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-corrective-failures">-</div>
+              <div class="stat-label">Fallas Correctivas</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-downtime">- h</div>
+              <div class="stat-label">Horas de Paro (Downtime)</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" id="kpi-total-cost">$ -</div>
+              <div class="stat-label">Gasto Total Mantenimiento</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reliability & Availability Section -->
+        <div class="dashboard-columns">
+          <!-- Availability Gauge & MTBF/MTTR Card -->
+          <div class="card reliability-card">
+            <div class="card-header">
+              <h2 class="card-title">Indicadores de Confiabilidad y Disponibilidad</h2>
+              <span class="badge badge-info">Estándar Mundial</span>
+            </div>
+            <div class="card-body reliability-body">
+              <!-- Visual Availability Gauge -->
+              <div class="availability-gauge-box">
+                <div class="gauge-container">
+                  <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="gauge-bg" cx="60" cy="60" r="52"></circle>
+                    <circle class="gauge-fill" id="availability-gauge-circle" cx="60" cy="60" r="52"></circle>
+                  </svg>
+                  <div class="gauge-center-text">
+                    <span class="gauge-percent" id="kpi-availability-pct">--%</span>
+                    <span class="gauge-sublabel">Disponibilidad</span>
+                  </div>
+                </div>
+                <div class="gauge-status-tag" id="gauge-status-tag">Calculando...</div>
+              </div>
+
+              <!-- MTBF & MTTR KPIs -->
+              <div class="reliability-metrics">
+                <div class="kpi-box">
+                  <div class="kpi-header">
+                    <span class="kpi-name">MTBF</span>
+                    <span class="kpi-formula">Horas Op / Fallas</span>
+                  </div>
+                  <div class="kpi-number text-cyan" id="kpi-mtbf">-</div>
+                  <div class="kpi-desc">Tiempo Medio Entre Fallas (Horas)</div>
+                </div>
+
+                <div class="kpi-box">
+                  <div class="kpi-header">
+                    <span class="kpi-name">MTTR</span>
+                    <span class="kpi-formula">Paro / Fallas</span>
+                  </div>
+                  <div class="kpi-number text-amber" id="kpi-mttr">-</div>
+                  <div class="kpi-desc">Tiempo Medio de Reparación (Horas)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-Equipment KPI Inspector -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Ficha de Confiabilidad por Activo</h2>
+              <select class="form-control form-control-sm select-equipment" id="select-kpi-equipment">
+                <option value="">-- Seleccionar Equipo --</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <div id="equipment-kpi-details" class="equipment-kpi-view">
+                <div class="empty-state-sm">Seleccione un equipo arriba para consultar sus indicadores específicos.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plant Status Distribution Bar -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h2 class="card-title">Distribución del Estado de Activos</h2>
+            <span class="text-muted text-sm" id="status-dist-summary">Cargando distribución...</span>
+          </div>
+          <div class="card-body">
+            <div class="distribution-bar" id="status-distribution-bar">
+              <div class="dist-segment dist-operational" style="width: 50%;"></div>
+              <div class="dist-segment dist-maintenance" style="width: 25%;"></div>
+              <div class="dist-segment dist-warning" style="width: 15%;"></div>
+              <div class="dist-segment dist-down" style="width: 10%;"></div>
+            </div>
+            <div class="distribution-legend">
+              <span class="legend-item"><span class="legend-dot dot-operational"></span> Operativo</span>
+              <span class="legend-item"><span class="legend-dot dot-maintenance"></span> Mantenimiento</span>
+              <span class="legend-item"><span class="legend-dot dot-warning"></span> Advertencia</span>
+              <span class="legend-item"><span class="legend-dot dot-down"></span> Fuera de Servicio (DOWN)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 2: INVENTARIO DE ACTIVOS (EQUIPOS) -->
+      <!-- =================================================================== -->
+      <section class="tab-pane" id="tab-equipments">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Catálogo e Inventario de Activos</h1>
+            <p class="view-subtitle">Control de maquinaria industrial, horas operadas, ubicación y estado de operatividad.</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-primary" id="btn-open-create-equipment">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Registrar Nuevo Activo
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="card filter-bar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="equipment-search-input" placeholder="Buscar por código (ej. CMP-001), nombre, tipo o ubicación...">
+          </div>
+          <div class="filter-chips" id="equipment-status-filters">
+            <button class="chip active" data-status="ALL">Todos</button>
+            <button class="chip" data-status="OPERATIONAL">Operativos</button>
+            <button class="chip" data-status="MAINTENANCE">En Mantenimiento</button>
+            <button class="chip" data-status="WARNING">Advertencia</button>
+            <button class="chip" data-status="DOWN">Fuera de Servicio</button>
+          </div>
+        </div>
+
+        <!-- Equipments Table -->
+        <div class="card table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="equipments-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre del Activo</th>
+                  <th>Tipo / Disciplina</th>
+                  <th>Ubicación</th>
+                  <th>Horas Op.</th>
+                  <th>Estado</th>
+                  <th>Fecha Alta</th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="equipments-tbody">
+                <tr><td colspan="8" class="text-center py-4">Cargando inventario de equipos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="equipments-count-label">Total de activos: 0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 3: ÓRDENES DE TRABAJO (OT) -->
+      <!-- =================================================================== -->
+      <section class="tab-pane" id="tab-work-orders">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Gestión de Órdenes de Trabajo (OT)</h1>
+            <p class="view-subtitle">Programación, ejecución, liquidación y seguimiento de intervenciones preventivas y correctivas.</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-accent" id="btn-open-create-wo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Nueva Orden de Trabajo
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="card filter-bar">
+          <div class="filter-chips" id="wo-status-filters">
+            <button class="chip active" data-wo-filter="ALL">Todas las Órdenes</button>
+            <button class="chip" data-wo-filter="ACTIVE">Activas (Pendientes / Progreso)</button>
+            <button class="chip" data-wo-filter="PENDING">Pendientes</button>
+            <button class="chip" data-wo-filter="IN_PROGRESS">En Progreso</button>
+            <button class="chip" data-wo-filter="COMPLETED">Completadas / Cerradas</button>
+            <button class="chip" data-wo-filter="CANCELLED">Canceladas</button>
+          </div>
+        </div>
+
+        <!-- Work Orders Table -->
+        <div class="card table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="work-orders-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Activo</th>
+                  <th>Título / Intervención</th>
+                  <th>Tipo</th>
+                  <th>Prioridad</th>
+                  <th>Estado</th>
+                  <th>Técnico Asignado</th>
+                  <th>Paro (h)</th>
+                  <th>Costo ($)</th>
+                  <th>Creación</th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="work-orders-tbody">
+                <tr><td colspan="11" class="text-center py-4">Cargando órdenes de trabajo...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="wo-count-label">Total de órdenes: 0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 4: MONITOR IOT & TELEMETRÍA ARDUINO -->
+      <!-- =================================================================== -->
+      <section class="tab-pane" id="tab-iot">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Monitor de Telemetría IoT & Sensores Arduino</h1>
+            <p class="view-subtitle">Monitoreo de condición predictiva en tiempo real bajo norma ISO 10816 para detección temprana de fallas.</p>
+          </div>
+        </div>
+
+        <!-- IoT Control Center Card -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="card-title">Simulador Sensorial & Estación de Monitoreo</h2>
+            <div class="iot-controls-header">
+              <label for="select-iot-equipment" class="text-sm font-semibold">Activo a Monitorear:</label>
+              <select class="form-control form-control-sm select-equipment" id="select-iot-equipment">
+                <option value="">Cargando activos...</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Critical Anomaly Alert Banner (Hidden by default, shown when alert fires) -->
+            <div class="iot-alarm-banner" id="iot-alarm-banner" style="display: none;">
+              <div class="alarm-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <div class="alarm-info">
+                <div class="alarm-title" id="alarm-banner-title">¡ALERTA CRÍTICA DE TELEMETRÍA DISPARADA!</div>
+                <div class="alarm-desc" id="alarm-banner-desc">Parámetros anormales detectados. Se ha generado automáticamente una Orden de Trabajo Predictiva.</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-dismiss-alarm">Cerrar Aviso</button>
+            </div>
+
+            <!-- Live Sensor Gauges / Cards -->
+            <div class="sensor-grid">
+              <!-- Temperature -->
+              <div class="sensor-card" id="sensor-temp-card">
+                <div class="sensor-header">
+                  <span class="sensor-title">TEMPERATURA</span>
+                  <span class="sensor-tag" id="tag-temp">NORMAL</span>
+                </div>
+                <div class="sensor-value">
+                  <span class="value-num" id="live-temp-val">--</span>
+                  <span class="value-unit">°C</span>
+                </div>
+                <div class="sensor-meter-bar">
+                  <div class="sensor-meter-fill fill-temp" id="meter-temp-fill" style="width: 30%;"></div>
+                </div>
+                <div class="sensor-limits">
+                  <span>Normal &lt; 70°C</span>
+                  <span>Alerta &ge; 70°C</span>
+                  <span>Crítico &ge; 85°C</span>
+                </div>
+              </div>
+
+              <!-- Vibration RMS ISO 10816 -->
+              <div class="sensor-card" id="sensor-vib-card">
+                <div class="sensor-header">
+                  <span class="sensor-title">VIBRACIÓN RMS (ISO 10816)</span>
+                  <span class="sensor-tag" id="tag-vib">NORMAL</span>
+                </div>
+                <div class="sensor-value">
+                  <span class="value-num" id="live-vib-val">--</span>
+                  <span class="value-unit">mm/s</span>
+                </div>
+                <div class="sensor-meter-bar">
+                  <div class="sensor-meter-fill fill-vib" id="meter-vib-fill" style="width: 25%;"></div>
+                </div>
+                <div class="sensor-limits">
+                  <span>Bueno &lt; 2.8</span>
+                  <span>Alerta &ge; 4.5</span>
+                  <span>Peligro &ge; 7.1</span>
+                </div>
+              </div>
+
+              <!-- Electrical Current -->
+              <div class="sensor-card" id="sensor-curr-card">
+                <div class="sensor-header">
+                  <span class="sensor-title">CORRIENTE CONSUMIDA</span>
+                  <span class="sensor-tag" id="tag-curr">NORMAL</span>
+                </div>
+                <div class="sensor-value">
+                  <span class="value-num" id="live-curr-val">--</span>
+                  <span class="value-unit">A</span>
+                </div>
+                <div class="sensor-meter-bar">
+                  <div class="sensor-meter-fill fill-curr" id="meter-curr-fill" style="width: 40%;"></div>
+                </div>
+                <div class="sensor-limits">
+                  <span>Carga Nominal: 15-25 A</span>
+                  <span>Sobrecarga: &gt; 30 A</span>
+                </div>
+              </div>
+
+              <!-- Condition Diagnosis -->
+              <div class="sensor-card diagnosis-card" id="sensor-diag-card">
+                <div class="sensor-header">
+                  <span class="sensor-title">DIAGNÓSTICO PREDICTIVO</span>
+                  <span class="sensor-tag tag-ready">ACTIVO</span>
+                </div>
+                <div class="diagnosis-status text-emerald" id="diagnosis-text">OPERACIÓN NORMAL</div>
+                <p class="diagnosis-detail" id="diagnosis-detail">Equipo trabajando dentro de tolerancias térmicas y mecánicas seguras.</p>
+              </div>
+            </div>
+
+            <!-- Simulation and Physical Hardware Action Bar -->
+            <div class="iot-actions-bar">
+              <div class="btn-group">
+                <button class="btn btn-primary" id="btn-simulate-normal">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  Simular Lectura Normal
+                </button>
+                <button class="btn btn-danger" id="btn-inject-anomaly">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                  ⚡ Inyectar Anomalía Crítica (Disparar Alarma y OT)
+                </button>
+              </div>
+
+              <!-- Physical Arduino Connection -->
+              <div class="serial-connector-box">
+                <span class="text-sm font-semibold">Arduino Físico (COM):</span>
+                <input type="text" class="form-control form-control-sm serial-input" id="serial-port-input" value="COM3" placeholder="COM3">
+                <button class="btn btn-secondary btn-sm" id="btn-read-serial">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                  Leer Serial
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry History Stream Log -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Registro de Eventos y Telemetría Reciente</h2>
+            <span class="text-muted text-sm">Persistido en SQLite (telemetry_logs)</span>
+          </div>
+          <div class="card-body">
+            <div class="telemetry-log-box" id="telemetry-log-stream">
+              <div class="log-entry text-muted">[Sistema Listo] Seleccione un activo e inicie lecturas para visualizar el flujo sensorial en tiempo real.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 5: REPORTES & EXPORTACIÓN CSV -->
+      <!-- =================================================================== -->
+      <section class="tab-pane" id="tab-reports">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Exportación de Reportes a CSV</h1>
+            <p class="view-subtitle">Genere archivos compatibles con Microsoft Excel, Power BI y Google Sheets para análisis de gestión.</p>
+          </div>
+        </div>
+
+        <div class="reports-grid">
+          <!-- Report Card: Equipos -->
+          <div class="card report-box">
+            <div class="report-icon icon-cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <h3 class="report-title">Inventario de Equipos y Activos</h3>
+            <p class="report-desc">Exporta el listado completo con códigos, disciplinas, ubicaciones, estados operativos y horas acumuladas.</p>
+            <div class="report-badge">equipos_[timestamp].csv</div>
+          </div>
+
+          <!-- Report Card: Work Orders -->
+          <div class="card report-box">
+            <div class="report-icon icon-emerald">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><line x1="9" y1="11" x2="15" y2="11"></line><line x1="9" y1="15" x2="13" y2="15"></line></svg>
+            </div>
+            <h3 class="report-title">Historial de Órdenes de Trabajo (OT)</h3>
+            <p class="report-desc">Exporta el ciclo de vida completo de OTs, técnicos responsables, tiempos de paro (downtime), costos liquidados y fechas de cierre.</p>
+            <div class="report-badge">ordenes_trabajo_[timestamp].csv</div>
+          </div>
+        </div>
+
+        <!-- Export Trigger Card -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h2 class="card-title">Generador de Archivos CSV</h2>
+          </div>
+          <div class="card-body">
+            <p class="text-secondary mb-3">Haga clic en el siguiente botón para generar los reportes actualizados con el contenido de la base de datos:</p>
+            <button class="btn btn-primary" id="btn-export-csv">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Generar y Descargar Archivos CSV
+            </button>
+
+            <!-- Export Results Area -->
+            <div class="export-results" id="export-results-area" style="display: none;">
+              <h4 class="text-sm font-semibold text-emerald mb-2">✔ Archivos generados correctamente:</h4>
+              <div class="download-links">
+                <a href="#" class="download-link" id="link-download-eq" download>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span id="name-download-eq">Descargar Inventario de Equipos.csv</span>
+                </a>
+                <a href="#" class="download-link" id="link-download-wo" download>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span id="name-download-wo">Descargar Historial de OTs.csv</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: REGISTRAR EQUIPO -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="modal-create-equipment">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Nuevo Activo Industrial</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-create-equipment">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="eq-code">Código de Activo *</label>
+            <input type="text" id="eq-code" class="form-control" placeholder="Ej: CMP-002, BOM-101, MTR-204" required>
+            <span class="form-hint">Debe ser un identificador único en mayúsculas.</span>
+          </div>
+          <div class="form-group">
+            <label for="eq-name">Nombre o Descripción del Activo *</label>
+            <input type="text" id="eq-name" class="form-control" placeholder="Ej: Compresor de Tornillo 100HP" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="eq-type">Tipo / Disciplina</label>
+              <input type="text" id="eq-type" class="form-control" placeholder="Ej: Mecánico, Eléctrico, Hidráulico">
+            </div>
+            <div class="form-group">
+              <label for="eq-location">Ubicación en Planta</label>
+              <input type="text" id="eq-location" class="form-control" placeholder="Ej: Nave 1, Molino B, Subestación">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="eq-hours">Horas de Operación Iniciales</label>
+            <input type="number" id="eq-hours" class="form-control" step="0.1" value="0.0" min="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Activo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: EDITAR EQUIPO -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="modal-edit-equipment">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Editar Datos del Activo</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-edit-equipment">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Código de Activo</label>
+            <input type="text" id="edit-eq-code" class="form-control" readonly disabled>
+          </div>
+          <div class="form-group">
+            <label for="edit-eq-name">Nombre / Descripción</label>
+            <input type="text" id="edit-eq-name" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-eq-type">Tipo / Disciplina</label>
+              <input type="text" id="edit-eq-type" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="edit-eq-location">Ubicación</label>
+              <input type="text" id="edit-eq-location" class="form-control">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-eq-status">Estado Operativo</label>
+              <select id="edit-eq-status" class="form-control">
+                <option value="OPERATIONAL">OPERATIONAL (Operativo)</option>
+                <option value="MAINTENANCE">MAINTENANCE (En Mantenimiento)</option>
+                <option value="WARNING">WARNING (En Advertencia)</option>
+                <option value="DOWN">DOWN (Fuera de Servicio)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-eq-hours">Horas Acumuladas</label>
+              <input type="number" id="edit-eq-hours" class="form-control" step="0.1" min="0">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary">Actualizar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: CREAR ORDEN DE TRABAJO (OT) -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="modal-create-wo">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear Nueva Orden de Trabajo (OT)</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-create-wo">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="wo-equipment-code">Activo a Intervenir *</label>
+            <select id="wo-equipment-code" class="form-control" required>
+              <option value="">-- Seleccionar Equipo --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="wo-title">Título de la Orden *</label>
+            <input type="text" id="wo-title" class="form-control" placeholder="Ej: Cambio de rodamientos de acople" required>
+          </div>
+          <div class="form-group">
+            <label for="wo-description">Descripción de la Falla o Tarea</label>
+            <textarea id="wo-description" class="form-control" rows="3" placeholder="Detalle las tareas requeridas o síntomas observados..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wo-type">Tipo de Mantenimiento</label>
+              <select id="wo-type" class="form-control">
+                <option value="PREVENTIVE">PREVENTIVE (Preventivo)</option>
+                <option value="CORRECTIVE">CORRECTIVE (Correctivo)</option>
+                <option value="PREDICTIVE">PREDICTIVE (Predictivo)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wo-priority">Prioridad</label>
+              <select id="wo-priority" class="form-control">
+                <option value="LOW">LOW (Baja)</option>
+                <option value="MEDIUM" selected>MEDIUM (Media)</option>
+                <option value="HIGH">HIGH (Alta)</option>
+                <option value="CRITICAL">CRITICAL (Crítica)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="wo-technician">Técnico / Responsable Asignado</label>
+            <input type="text" id="wo-technician" class="form-control" placeholder="Ej: Ing. Carlos Mendoza o Técnico de Turno" value="Técnico de Turno">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn btn-accent">Generar Orden (OT)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: CERRAR / LIQUIDAR ORDEN DE TRABAJO (OT) -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="modal-close-wo">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Cierre y Liquidación de OT</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-close-wo">
+        <input type="hidden" id="close-wo-id">
+        <div class="modal-body">
+          <div class="alert-info-box mb-3" id="close-wo-summary">
+            Cerrando Orden de Trabajo...
+          </div>
+          <div class="form-group">
+            <label for="close-wo-downtime">Horas Reales de Paro de Máquina (Downtime) *</label>
+            <input type="number" id="close-wo-downtime" class="form-control" step="0.1" min="0" value="0.0" required>
+            <span class="form-hint">Tiempo que la máquina estuvo detenida para la reparación.</span>
+          </div>
+          <div class="form-group">
+            <label for="close-wo-cost">Costo Total de Repuestos y Mano de Obra ($ USD) *</label>
+            <input type="number" id="close-wo-cost" class="form-control" step="0.01" min="0" value="0.0" required>
+            <span class="form-hint">Impactará en los KPIs de gasto acumulado de mantenimiento.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary">Finalizar y Cerrar OT</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ACCESO MÓVIL / WI-FI & NOTIFICACIONES TELEGRAM -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="modal-mobile-access">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📱 Acceso Móvil para Técnicos & Alertas</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert-info-box">
+          <strong>Red Wi-Fi Local:</strong> Cualquier técnico conectado a la red de la planta puede abrir el portal en su celular o tablet sin instalar nada.
+        </div>
+
+        <div class="form-group mt-2">
+          <label style="font-weight: 700; color: #fff;">Enlace del Portal Móvil para Técnicos:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="net-technician-url" class="form-control" readonly style="font-family: var(--font-mono); font-weight: 600; color: #60a5fa;">
+            <a id="btn-open-tech-portal" href="/tecnico" target="_blank" class="btn btn-primary btn-sm" style="white-space: nowrap;">Abrir Portal</a>
+          </div>
+          <span class="form-hint">Pide a los técnicos que abran este enlace y toquen <em>"Agregar a la pantalla de inicio"</em> para usarlo como app.</span>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 16px 0;">
+
+        <!-- Telegram Notifications Config -->
+        <h4 style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">🔔 Notificaciones al Teléfono (Telegram Bot)</h4>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Envía una alerta automática con enlace directo a la OT al celular del técnico cada vez que se cree una orden o salte una alarma IoT.</p>
+
+        <form id="form-notifications-config">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <input type="checkbox" id="notif-enabled" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="notif-enabled" style="font-weight: 600; color: #fff; cursor: pointer;">Habilitar Notificaciones Automáticas en Telegram</label>
+          </div>
+
+          <div class="form-group mb-2">
+            <label for="notif-telegram-token">Telegram Bot Token:</label>
+            <input type="text" id="notif-telegram-token" class="form-control" placeholder="Ej: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="notif-telegram-chat">Telegram Chat ID / ID de Grupo:</label>
+            <input type="text" id="notif-telegram-chat" class="form-control" placeholder="Ej: -100123456789 o ID de usuario">
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary btn-sm">Guardar Configuración</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-test-notification">🔔 Probar Envío de Alerta</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Cambiar Contraseña de Acceso -->
+  <div class="modal-overlay" id="modal-change-password" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(5, 10, 20, 0.8); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-card" style="background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15); overflow: hidden;">
+      
+      <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #38bdf8;">
+            🔒
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #f8fafc;">Seguridad de la Cuenta</h3>
+            <p style="margin: 2px 0 0; font-size: 12px; color: #94a3b8;">Cambiar Contraseña de Acceso</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-password-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;" title="Cerrar">&times;</button>
+      </div>
+
+      <div style="padding: 20px 24px;">
+        <div id="pwd-modal-alert" class="modal-alert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <form id="form-change-password">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Contraseña Actual</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-current" required placeholder="••••••••" autocomplete="current-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Nueva Contraseña</label>
+              <span id="pwd-strength-label" style="font-size: 11px; font-weight: 600; color: #94a3b8;">Seguridad requerida</span>
+            </div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-new" required placeholder="Ej: SuperClave2026!" autocomplete="new-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin-top: 8px; overflow: hidden;">
+              <div id="pwd-strength-bar" style="width: 0%; height: 100%; background: #ef4444; transition: width 0.3s ease, background-color 0.3s ease;"></div>
+            </div>
+
+            <div style="margin-top: 10px; padding: 10px 12px; background: rgba(0, 0, 0, 0.25); border-radius: 8px; font-size: 11px; color: #94a3b8; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div id="chk-min-len" data-text="Mín. 8 caracteres"><span style="color:#64748b;">○</span> Mín. 8 caracteres</div>
+              <div id="chk-upper" data-text="Mayúscula (A-Z)"><span style="color:#64748b;">○</span> Mayúscula (A-Z)</div>
+              <div id="chk-lower" data-text="Minúscula (a-z)"><span style="color:#64748b;">○</span> Minúscula (a-z)</div>
+              <div id="chk-num-sym" data-text="Número / Símbolo"><span style="color:#64748b;">○</span> Número / Símbolo</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Confirmar Nueva Contraseña</label>
+              <span id="pwd-match-indicator" style="font-size: 11px; font-weight: 600;"></span>
+            </div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-confirm" required placeholder="Repite la nueva contraseña" autocomplete="new-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn-close-modal" style="padding: 10px 16px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancelar</button>
+            <button type="submit" id="btn-submit-password" style="padding: 10px 20px; background: linear-gradient(135deg, #0284c7, #38bdf8); border: none; color: #0f172a; font-weight: 700; border-radius: 8px; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);">Guardar Nueva Contraseña</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/js/auth.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

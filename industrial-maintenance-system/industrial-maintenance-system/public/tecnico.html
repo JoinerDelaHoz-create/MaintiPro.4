@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CMMS Móvil - Portal del Técnico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tecnico.css">
+</head>
+<body>
+  <!-- Mobile / Tablet Header -->
+  <header class="mobile-header">
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="brand-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        </div>
+        <div>
+          <div class="brand-title">CMMS MÓVIL</div>
+          <div class="brand-sub">Portal de Campo para Técnicos</div>
+        </div>
+      </div>
+      <div class="connection-status">
+        <span class="status-dot"></span>
+        <span id="conn-text">En Línea</span>
+      </div>
+    </div>
+
+    <!-- Authenticated Technician Profile Bar -->
+    <div class="tech-bar">
+      <div class="tech-profile-info">
+        <div class="tech-avatar">🔧</div>
+        <div class="tech-meta">
+          <span class="tech-name" id="tech-user-name">Cargando perfil...</span>
+          <span class="tech-role-badge" id="tech-user-role">Técnico de Campo</span>
+        </div>
+      </div>
+      <div class="tech-actions" style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn-open-change-password" id="btn-open-change-password" title="Cambiar Contraseña" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+          <span>🔑 Clave</span>
+        </button>
+        <button type="button" class="btn-tech-logout" id="btn-logout" title="Cerrar Sesión">
+          <span>Salir</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Filter Tabs -->
+    <div class="tab-filters">
+      <button class="filter-tab active" data-filter="ACTIVE">Mis OTs Activas</button>
+      <button class="filter-tab" data-filter="UNASSIGNED">Disponibles para Todos ✋</button>
+      <button class="filter-tab" data-filter="PENDING">Pendientes</button>
+      <button class="filter-tab" data-filter="IN_PROGRESS">En Progreso</button>
+      <button class="filter-tab" data-filter="COMPLETED">Historial / Cerradas</button>
+    </div>
+  </header>
+
+  <!-- Main Work Orders Container -->
+  <main class="mobile-content">
+    <div class="list-summary">
+      <span id="orders-count-text">Cargando órdenes asignadas...</span>
+      <button class="refresh-btn" id="btn-refresh" title="Actualizar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      </button>
+    </div>
+
+    <!-- Orders Feed -->
+    <div class="orders-feed" id="orders-feed">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando órdenes de trabajo...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: FINALIZAR TRABAJO (¿Qué se hizo? y ¿Qué se usó?) -->
+  <!-- ===================================================================== -->
+  <div class="mobile-modal" id="modal-finish-wo">
+    <div class="mobile-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="finish-wo-title">Finalizar Orden de Trabajo</h2>
+          <div class="modal-subtitle" id="finish-wo-meta">OT #--</div>
+        </div>
+        <button class="btn-close" id="btn-close-finish">&times;</button>
+      </div>
+
+      <form id="form-finish-wo">
+        <input type="hidden" id="finish-wo-id">
+
+        <div class="modal-body">
+          <!-- QUESTION 1: QUÉ SE HIZO -->
+          <div class="form-card">
+            <label for="finish-work-done" class="field-title">
+              <span class="step-num">1</span>
+              ¿Qué se hizo en la máquina? *
+            </label>
+            <p class="field-desc">Describe las tareas, reparaciones, ajustes o inspecciones realizadas.</p>
+            <textarea
+              id="finish-work-done"
+              class="mobile-textarea"
+              rows="4"
+              placeholder="Ej: Se desmontó el acople, se reemplazaron los rodamientos 6308 y se lubricó con grasa de alta temperatura. Se probó en vacío 15 minutos."
+              required
+            ></textarea>
+          </div>
+
+          <!-- QUESTION 2: QUÉ SE USÓ -->
+          <div class="form-card">
+            <label for="finish-materials-used" class="field-title">
+              <span class="step-num">2</span>
+              ¿Qué repuestos y materiales se usaron? *
+            </label>
+            <p class="field-desc">Lista los repuestos, piezas, aceites, tornillería o insumos utilizados.</p>
+            <textarea
+              id="finish-materials-used"
+              class="mobile-textarea"
+              rows="3"
+              placeholder="Ej: 2 Rodamientos SKF 6308-2RS, 1 retenedor de aceite 45x65x10, 200g grasa Mobilith SHC."
+              required
+            ></textarea>
+          </div>
+
+          <!-- PARAMETERS: PARO Y COSTO -->
+          <div class="form-row">
+            <div class="form-card-half">
+              <label for="finish-downtime" class="field-title-sm">Horas de Paro (Downtime)</label>
+              <input type="number" id="finish-downtime" class="mobile-input" step="0.1" min="0" value="1.0" required>
+            </div>
+            <div class="form-card-half">
+              <label for="finish-cost" class="field-title-sm">Costo Repuestos ($ USD)</label>
+              <input type="number" id="finish-cost" class="mobile-input" step="0.01" min="0" value="0.00" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-touch btn-touch-cancel" id="btn-cancel-finish">Cancelar</button>
+          <button type="submit" class="btn-touch btn-touch-confirm">✔ Registrar y Finalizar OT</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cambiar Contraseña de Acceso -->
+  <div class="modal-overlay" id="modal-change-password" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(5, 10, 20, 0.82); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-card" style="background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15); overflow: hidden;">
+      
+      <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #38bdf8;">
+            🔒
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #f8fafc;">Seguridad de la Cuenta</h3>
+            <p style="margin: 2px 0 0; font-size: 12px; color: #94a3b8;">Cambiar Contraseña de Acceso</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-password-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;" title="Cerrar">&times;</button>
+      </div>
+
+      <div style="padding: 20px 24px;">
+        <div id="pwd-modal-alert" class="modal-alert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <form id="form-change-password">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Contraseña Actual</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-current" required placeholder="••••••••" autocomplete="current-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Nueva Contraseña</label>
+              <span id="pwd-strength-label" style="font-size: 11px; font-weight: 600; color: #94a3b8;">Seguridad requerida</span>
+            </div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-new" required placeholder="Ej: SuperClave2026!" autocomplete="new-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin-top: 8px; overflow: hidden;">
+              <div id="pwd-strength-bar" style="width: 0%; height: 100%; background: #ef4444; transition: width 0.3s ease, background-color 0.3s ease;"></div>
+            </div>
+
+            <div style="margin-top: 10px; padding: 10px 12px; background: rgba(0, 0, 0, 0.25); border-radius: 8px; font-size: 11px; color: #94a3b8; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div id="chk-min-len" data-text="Mín. 8 caracteres"><span style="color:#64748b;">○</span> Mín. 8 caracteres</div>
+              <div id="chk-upper" data-text="Mayúscula (A-Z)"><span style="color:#64748b;">○</span> Mayúscula (A-Z)</div>
+              <div id="chk-lower" data-text="Minúscula (a-z)"><span style="color:#64748b;">○</span> Minúscula (a-z)</div>
+              <div id="chk-num-sym" data-text="Número / Símbolo"><span style="color:#64748b;">○</span> Número / Símbolo</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Confirmar Nueva Contraseña</label>
+              <span id="pwd-match-indicator" style="font-size: 11px; font-weight: 600;"></span>
+            </div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="pwd-confirm" required placeholder="Repite la nueva contraseña" autocomplete="new-password" style="width: 100%; padding: 11px 40px 11px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none;">
+              <button type="button" class="btn-toggle-eye" style="position: absolute; right: 10px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn-close-modal" style="padding: 10px 16px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancelar</button>
+            <button type="submit" id="btn-submit-password" style="padding: 10px 20px; background: linear-gradient(135deg, #0284c7, #38bdf8); border: none; color: #0f172a; font-weight: 700; border-radius: 8px; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);">Guardar Nueva Contraseña</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Toast Notification -->
+  <div class="mobile-toast" id="mobile-toast"></div>
+
+  <!-- Scripts -->
+  <script src="/js/auth.js"></script>
+  <script src="/js/tecnico.js"></script>
+</body>
+</html>

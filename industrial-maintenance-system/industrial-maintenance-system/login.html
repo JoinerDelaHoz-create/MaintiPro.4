@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Acceso al Sistema - CMMS Industrial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #080d1a;
+      --bg-card: rgba(15, 23, 42, 0.85);
+      --border-color: rgba(56, 189, 248, 0.2);
+      --border-focus: #38bdf8;
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #10b981;
+      --danger: #ef4444;
+      --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.12) 0px, transparent 50%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 189, 248, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #2563eb, #38bdf8, #10b981);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(56, 189, 248, 0.2));
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    .brand-logo svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--accent-cyan);
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .brand-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--border-focus);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </svg>
+      </div>
+      <h1 class="brand-title">CMMS INDUSTRIAL</h1>
+      <p class="brand-desc">Gestión y Mantenimiento de Planta v2.0</p>
+    </div>
+
+    <div class="alert-error" id="login-error">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <span id="error-message">Credenciales incorrectas</span>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username" class="form-label">Usuario</label>
+        <input type="text" id="username" class="form-input" placeholder="Ej: admin o carlos" required autofocus autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Contraseña / PIN</label>
+        <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-submit">
+        <span>Ingresar al Sistema</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+    </form>
+
+    <div class="footer-note">
+      Sistema industrial con control de acceso por roles (RBAC)
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const errorBox = document.getElementById('login-error');
+      const errorMsg = document.getElementById('error-message');
+      const submitBtn = document.getElementById('btn-submit');
+
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Verificando...</span>';
+
+      function redirectAfterLogin(user) {
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get('returnUrl');
+        if (returnUrl && !returnUrl.includes('/login')) {
+          window.location.href = returnUrl;
+          return;
+        }
+        if (user.role === 'ADMIN') {
+          window.location.href = '/';
+        } else {
+          window.location.href = '/tecnico';
+        }
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: usernameInput.value.trim(),
+            password: passwordInput.value,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            AuthClient.setSession(data.token, data.user);
+            redirectAfterLogin(data.user);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('API error, checking demo credentials:', err);
+      }
+
+      // Cloud / Demo accounts fallback
+      const fallbackUsers = {
+        'admin': { pass: 'admin123', full_name: 'Administrador de Planta', role: 'ADMIN' },
+        'carlos': { pass: '1234', full_name: 'Ing. Carlos Mendoza', role: 'TECHNICIAN' },
+        'laura': { pass: '1234', full_name: 'Tec. Laura Ramos', role: 'TECHNICIAN' },
+        'andres': { pass: '1234', full_name: 'Tec. Andrés Silva', role: 'TECHNICIAN' },
+      };
+
+      const usr = usernameInput.value.trim().toLowerCase();
+      const pwd = passwordInput.value;
+
+      // Check if user has updated their password
+      try {
+        const customPasswords = JSON.parse(localStorage.getItem('cmms_custom_passwords') || '{}');
+        if (customPasswords[usr] && fallbackUsers[usr]) {
+          fallbackUsers[usr].pass = customPasswords[usr];
+        }
+      } catch (e) {}
+      if (fallbackUsers[usr] && fallbackUsers[usr].pass === pwd) {
+        const userObj = {
+          id: usr === 'admin' ? 1 : 2,
+          username: usr,
+          full_name: fallbackUsers[usr].full_name,
+          role: fallbackUsers[usr].role,
+        };
+        AuthClient.setSession('token-' + usr + '-' + Date.now(), userObj);
+        redirectAfterLogin(userObj);
+        return;
+      }
+
+      errorMsg.textContent = 'Usuario o contraseña incorrectos';
+      errorBox.style.display = 'flex';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Ingresar al Sistema</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+    });
+
+    // If already logged in, redirect immediately
+    document.addEventListener('DOMContentLoaded', () => {
+      if (AuthClient.isAuthenticated()) {
+        const user = AuthClient.getUser();
+        if (user?.role === 'ADMIN') {
+          window.location.href = '/';
+        } else if (user?.role === 'TECHNICIAN') {
+          window.location.href = '/tecnico';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "telegram_enabled": false,
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "webhook_enabled": false,
+  "webhook_url": ""
+}
